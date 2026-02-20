@@ -2,49 +2,69 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>34 DIVERSE // VIDEO_SECTOR_TEST</title>
+    <title>34 DIVERSE // INFINITE_BREACH</title>
     <style>
         body { background-color: #050a14; color: #60a5fa; font-family: 'Courier New', monospace; padding: 20px; }
-        .terminal-header { border-bottom: 2px solid #1e3a8a; padding-bottom: 20px; text-align: center; }
-        h1 { color: #22c55e; letter-spacing: 5px; text-shadow: 0 0 10px #22c55e; }
+        .terminal-header { border-bottom: 2px solid #1e3a8a; padding-bottom: 20px; text-align: center; position: sticky; top: 0; background: #050a14; z-index: 100; }
+        h1 { color: #22c55e; letter-spacing: 5px; text-shadow: 0 0 10px #22c55e; margin: 0; }
         #query { background: #0d1626; border: 1px solid #1e3a8a; color: #22c55e; padding: 12px; width: 300px; outline: none; }
         .btn { background: #1e3a8a; color: white; border: 1px solid #60a5fa; padding: 12px 25px; cursor: pointer; font-weight: bold; }
         
-        #intel-feed { margin-top: 30px; display: grid; grid-template-columns: repeat(auto-fill, minmax(400px, 1fr)); gap: 20px; }
+        #intel-feed { margin-top: 30px; display: grid; grid-template-columns: repeat(auto-fill, minmax(380px, 1fr)); gap: 20px; }
         .result-card { border: 1px solid #1e3a8a; background: #000; overflow: hidden; display: flex; flex-direction: column; }
         
-        /* VIDEO VIEWPORT - Forced 16:9 Aspect Ratio */
         .video-viewport { width: 100%; position: relative; padding-top: 56.25%; background: #050a14; }
         .video-viewport iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; }
 
         .card-content { padding: 15px; background: rgba(13, 22, 38, 0.9); }
-        .result-title { color: #22c55e; font-size: 14px; text-decoration: none; font-weight: bold; display: block; margin-bottom: 5px; }
-        .sector-badge { font-size: 9px; padding: 2px 6px; border: 1px solid #60a5fa; color: #60a5fa; text-transform: uppercase; }
+        .result-title { color: #22c55e; font-size: 14px; text-decoration: none; font-weight: bold; display: block; }
+        
+        /* THE LOAD MORE TRIGGER */
+        #pagination-control { text-align: center; padding: 40px; display: none; }
+        .load-btn { background: #22c55e; color: #050a14; border: none; padding: 15px 40px; font-weight: bold; cursor: pointer; }
     </style>
 </head>
 <body>
 
     <div class="terminal-header">
         <h1>34 DIVERSE</h1>
-        <p>> [SYSTEM]: <span style="color: #22c55e;">MULTI_VIDEO_INFILTRATION_READY</span></p>
-        <input type="text" id="query" placeholder="SEARCH YOUTUBE / DAILYMOTION...">
-        <button class="btn" onclick="executeVideoBreach()">BREACH VIDEOS</button>
+        <p>> [SYSTEM]: <span style="color: #22c55e;">EXTRACTOR_ACTIVE</span> | OFFSET: <span id="offset-count">0</span></p>
+        <input type="text" id="query" placeholder="SEARCH TARGET...">
+        <button class="btn" onclick="initialSearch()">START EXTRACTION</button>
     </div>
 
-    <div id="intel-feed">
-        <p>> System idle. Waiting for video coordinates...</p>
+    <div id="intel-feed"></div>
+
+    <div id="pagination-control">
+        <button class="load-btn" onclick="fetchMore()">REQUEST NEXT WAVE</button>
     </div>
 
     <script>
-        async function executeVideoBreach() {
-            const target = document.getElementById('query').value;
-            if(!target) return;
-            const feed = document.getElementById('intel-feed');
-            feed.innerHTML = "<p>> [SCANNED SECTORS: YT, DM, VM]... EXTRACTING STREAMS...</p>";
+        let currentOffset = 0;
+        let lastQuery = "";
 
-            // Broad search for video assets
-            const queryUrl = `${target} site:youtube.com OR site:dailymotion.com OR site:vimeo.com`;
-            const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(`https://duckduckgo.com/html/?q=${encodeURIComponent(queryUrl)}`)}`;
+        function initialSearch() {
+            const q = document.getElementById('query').value;
+            if(!q) return;
+            lastQuery = q;
+            currentOffset = 0;
+            document.getElementById('intel-feed').innerHTML = "";
+            executeBreach();
+        }
+
+        async function fetchMore() {
+            currentOffset += 30; // DuckDuckGo HTML usually jumps in increments of 30
+            executeBreach();
+        }
+
+        async function executeBreach() {
+            const feed = document.getElementById('intel-feed');
+            const status = document.getElementById('offset-count');
+            status.innerText = currentOffset;
+
+            // TACTICAL PARAMETER: 's' is the offset in DuckDuckGo HTML
+            const searchUrl = `https://html.duckduckgo.com/html/?q=${encodeURIComponent(lastQuery + " site:youtube.com OR site:dailymotion.com")}&s=${currentOffset}&dc=${currentOffset + 1}`;
+            const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(searchUrl)}`;
 
             try {
                 const response = await fetch(proxyUrl);
@@ -52,7 +72,6 @@
                 const parser = new DOMParser();
                 const doc = parser.parseFromString(data.contents, 'text/html');
                 const results = doc.querySelectorAll('.result');
-                feed.innerHTML = "";
 
                 results.forEach(res => {
                     const titleLink = res.querySelector('.result__a');
@@ -61,41 +80,31 @@
                         let cleanUrl = rawHref.includes('uddg=') ? decodeURIComponent(rawHref.split('uddg=')[1].split('&')[0]) : rawHref;
                         
                         let embedUrl = "";
-                        let sector = "Unknown";
-
-                        // Sector Detection & Embed Mapping
                         if (cleanUrl.includes("youtube.com/watch?v=")) {
                             const id = cleanUrl.split("v=")[1].split("&")[0];
                             embedUrl = `https://www.youtube.com/embed/${id}`;
-                            sector = "YouTube";
                         } else if (cleanUrl.includes("dailymotion.com/video/")) {
                             const id = cleanUrl.split("/video/")[1].split("?")[0];
                             embedUrl = `https://www.dailymotion.com/embed/video/${id}`;
-                            sector = "Dailymotion";
-                        } else if (cleanUrl.includes("vimeo.com/")) {
-                            const id = cleanUrl.split("vimeo.com/")[1].split("?")[0];
-                            embedUrl = `https://player.vimeo.com/video/${id}`;
-                            sector = "Vimeo";
                         }
 
                         if (embedUrl) {
                             const card = document.createElement('div');
                             card.className = 'result-card';
                             card.innerHTML = `
-                                <div class="video-viewport">
-                                    <iframe src="${embedUrl}" allowfullscreen></iframe>
-                                </div>
+                                <div class="video-viewport"><iframe src="${embedUrl}" allowfullscreen></iframe></div>
                                 <div class="card-content">
-                                    <span class="sector-badge">${sector}</span>
                                     <a class="result-title" href="${cleanUrl}" target="_blank">${titleLink.innerText}</a>
-                                </div>
-                            `;
+                                </div>`;
                             feed.appendChild(card);
                         }
                     }
                 });
+
+                document.getElementById('pagination-control').style.display = "block";
+
             } catch (e) {
-                feed.innerHTML = "<p>> ERROR: SIGNAL JAMMED.</p>";
+                console.error("Breach failed", e);
             }
         }
     </script>
