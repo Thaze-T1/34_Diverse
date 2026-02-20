@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>34 DIVERSE // INFINITE_BREACH</title>
+    <title>34 DIVERSE // SIGNAL_CLEANER</title>
     <style>
         body { background-color: #050a14; color: #60a5fa; font-family: 'Courier New', monospace; padding: 20px; }
         .terminal-header { border-bottom: 2px solid #1e3a8a; padding-bottom: 20px; text-align: center; position: sticky; top: 0; background: #050a14; z-index: 100; }
@@ -11,15 +11,15 @@
         .btn { background: #1e3a8a; color: white; border: 1px solid #60a5fa; padding: 12px 25px; cursor: pointer; font-weight: bold; }
         
         #intel-feed { margin-top: 30px; display: grid; grid-template-columns: repeat(auto-fill, minmax(380px, 1fr)); gap: 20px; }
-        .result-card { border: 1px solid #1e3a8a; background: #000; overflow: hidden; display: flex; flex-direction: column; }
+        .result-card { border: 1px solid #1e3a8a; background: #000; overflow: hidden; display: flex; flex-direction: column; transition: 0.3s; }
+        .result-card:hover { border-color: #22c55e; box-shadow: 0 0 10px rgba(34, 197, 94, 0.4); }
         
         .video-viewport { width: 100%; position: relative; padding-top: 56.25%; background: #050a14; }
         .video-viewport iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; }
 
         .card-content { padding: 15px; background: rgba(13, 22, 38, 0.9); }
-        .result-title { color: #22c55e; font-size: 14px; text-decoration: none; font-weight: bold; display: block; }
+        .result-title { color: #22c55e; font-size: 14px; text-decoration: none; font-weight: bold; }
         
-        /* THE LOAD MORE TRIGGER */
         #pagination-control { text-align: center; padding: 40px; display: none; }
         .load-btn { background: #22c55e; color: #050a14; border: none; padding: 15px 40px; font-weight: bold; cursor: pointer; }
     </style>
@@ -28,8 +28,8 @@
 
     <div class="terminal-header">
         <h1>34 DIVERSE</h1>
-        <p>> [SYSTEM]: <span style="color: #22c55e;">EXTRACTOR_ACTIVE</span> | OFFSET: <span id="offset-count">0</span></p>
-        <input type="text" id="query" placeholder="SEARCH TARGET...">
+        <p>> [STATUS]: <span style="color: #22c55e;">CACHE_BUSTER_ENABLED</span> | <span id="status-msg">READY</span></p>
+        <input type="text" id="query" placeholder="IDENTIFY NEW TARGET...">
         <button class="btn" onclick="initialSearch()">START EXTRACTION</button>
     </div>
 
@@ -49,22 +49,23 @@
             lastQuery = q;
             currentOffset = 0;
             document.getElementById('intel-feed').innerHTML = "";
+            document.getElementById('status-msg').innerText = "CLEANING CACHE...";
             executeBreach();
         }
 
         async function fetchMore() {
-            currentOffset += 30; // DuckDuckGo HTML usually jumps in increments of 30
+            currentOffset += 30;
             executeBreach();
         }
 
         async function executeBreach() {
             const feed = document.getElementById('intel-feed');
-            const status = document.getElementById('offset-count');
-            status.innerText = currentOffset;
-
-            // TACTICAL PARAMETER: 's' is the offset in DuckDuckGo HTML
-            const searchUrl = `https://html.duckduckgo.com/html/?q=${encodeURIComponent(lastQuery + " site:youtube.com OR site:dailymotion.com")}&s=${currentOffset}&dc=${currentOffset + 1}`;
-            const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(searchUrl)}`;
+            
+            // THE CACHE BUSTER: We add a random number so the proxy doesn't serve old data
+            const cacheBuster = Math.floor(Math.random() * 99999);
+            const searchUrl = `https://html.duckduckgo.com/html/?q=${encodeURIComponent(lastQuery + " site:youtube.com OR site:dailymotion.com")}&s=${currentOffset}&dc=${currentOffset + 1}&v=${cacheBuster}`;
+            
+            const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(searchUrl)}&cb=${cacheBuster}`;
 
             try {
                 const response = await fetch(proxyUrl);
@@ -72,6 +73,8 @@
                 const parser = new DOMParser();
                 const doc = parser.parseFromString(data.contents, 'text/html');
                 const results = doc.querySelectorAll('.result');
+
+                document.getElementById('status-msg').innerText = "DATA EXTRACTED";
 
                 results.forEach(res => {
                     const titleLink = res.querySelector('.result__a');
@@ -91,11 +94,8 @@
                         if (embedUrl) {
                             const card = document.createElement('div');
                             card.className = 'result-card';
-                            card.innerHTML = `
-                                <div class="video-viewport"><iframe src="${embedUrl}" allowfullscreen></iframe></div>
-                                <div class="card-content">
-                                    <a class="result-title" href="${cleanUrl}" target="_blank">${titleLink.innerText}</a>
-                                </div>`;
+                            card.innerHTML = `<div class="video-viewport"><iframe src="${embedUrl}" allowfullscreen></iframe></div>
+                                <div class="card-content"><a class="result-title" href="${cleanUrl}" target="_blank">${titleLink.innerText}</a></div>`;
                             feed.appendChild(card);
                         }
                     }
@@ -104,7 +104,7 @@
                 document.getElementById('pagination-control').style.display = "block";
 
             } catch (e) {
-                console.error("Breach failed", e);
+                document.getElementById('status-msg').innerText = "SIGNAL ERROR";
             }
         }
     </script>
