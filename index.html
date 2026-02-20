@@ -2,109 +2,95 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>34 DIVERSE // SIGNAL_CLEANER</title>
+    <title>34 DIVERSE // VELOCITY_CORE</title>
     <style>
-        body { background-color: #050a14; color: #60a5fa; font-family: 'Courier New', monospace; padding: 20px; }
-        .terminal-header { border-bottom: 2px solid #1e3a8a; padding-bottom: 20px; text-align: center; position: sticky; top: 0; background: #050a14; z-index: 100; }
-        h1 { color: #22c55e; letter-spacing: 5px; text-shadow: 0 0 10px #22c55e; margin: 0; }
+        body { background-color: #050a14; color: #60a5fa; font-family: 'Courier New', monospace; margin: 0; padding: 20px; }
+        .terminal-header { border-bottom: 2px solid #1e3a8a; padding-bottom: 20px; text-align: center; }
+        h1 { color: #22c55e; letter-spacing: 5px; text-shadow: 0 0 10px #22c55e; }
         #query { background: #0d1626; border: 1px solid #1e3a8a; color: #22c55e; padding: 12px; width: 300px; outline: none; }
         .btn { background: #1e3a8a; color: white; border: 1px solid #60a5fa; padding: 12px 25px; cursor: pointer; font-weight: bold; }
         
-        #intel-feed { margin-top: 30px; display: grid; grid-template-columns: repeat(auto-fill, minmax(380px, 1fr)); gap: 20px; }
-        .result-card { border: 1px solid #1e3a8a; background: #000; overflow: hidden; display: flex; flex-direction: column; transition: 0.3s; }
-        .result-card:hover { border-color: #22c55e; box-shadow: 0 0 10px rgba(34, 197, 94, 0.4); }
-        
+        #intel-feed { margin-top: 30px; display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 15px; }
+        .result-card { border: 1px solid #1e3a8a; background: #000; overflow: hidden; display: flex; flex-direction: column; }
         .video-viewport { width: 100%; position: relative; padding-top: 56.25%; background: #050a14; }
         .video-viewport iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; }
-
-        .card-content { padding: 15px; background: rgba(13, 22, 38, 0.9); }
-        .result-title { color: #22c55e; font-size: 14px; text-decoration: none; font-weight: bold; }
+        .card-content { padding: 10px; background: rgba(13, 22, 38, 0.9); }
+        .result-title { color: #22c55e; font-size: 13px; text-decoration: none; font-weight: bold; }
         
-        #pagination-control { text-align: center; padding: 40px; display: none; }
-        .load-btn { background: #22c55e; color: #050a14; border: none; padding: 15px 40px; font-weight: bold; cursor: pointer; }
+        .loading-pulse { color: #22c55e; font-weight: bold; animation: blink 1s infinite; }
+        @keyframes blink { 50% { opacity: 0; } }
     </style>
 </head>
 <body>
 
     <div class="terminal-header">
         <h1>34 DIVERSE</h1>
-        <p>> [STATUS]: <span style="color: #22c55e;">CACHE_BUSTER_ENABLED</span> | <span id="status-msg">READY</span></p>
-        <input type="text" id="query" placeholder="IDENTIFY NEW TARGET...">
-        <button class="btn" onclick="initialSearch()">START EXTRACTION</button>
+        <p>> [SPEED_MODE]: <span class="loading-pulse">ACTIVE</span></p>
+        <input type="text" id="query" placeholder="IDENTIFY TARGET..." onkeydown="if(event.key==='Enter') quickBreach()">
+        <button class="btn" onclick="quickBreach()">EXECUTE</button>
     </div>
 
     <div id="intel-feed"></div>
 
-    <div id="pagination-control">
-        <button class="load-btn" onclick="fetchMore()">REQUEST NEXT WAVE</button>
-    </div>
-
     <script>
-        let currentOffset = 0;
-        let lastQuery = "";
-
-        function initialSearch() {
+        async function quickBreach() {
             const q = document.getElementById('query').value;
             if(!q) return;
-            lastQuery = q;
-            currentOffset = 0;
-            document.getElementById('intel-feed').innerHTML = "";
-            document.getElementById('status-msg').innerText = "CLEANING CACHE...";
-            executeBreach();
-        }
 
-        async function fetchMore() {
-            currentOffset += 30;
-            executeBreach();
-        }
-
-        async function executeBreach() {
             const feed = document.getElementById('intel-feed');
-            
-            // THE CACHE BUSTER: We add a random number so the proxy doesn't serve old data
-            const cacheBuster = Math.floor(Math.random() * 99999);
-            const searchUrl = `https://html.duckduckgo.com/html/?q=${encodeURIComponent(lastQuery + " site:youtube.com OR site:dailymotion.com")}&s=${currentOffset}&dc=${currentOffset + 1}&v=${cacheBuster}`;
-            
-            const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(searchUrl)}&cb=${cacheBuster}`;
+            feed.innerHTML = "<p class='loading-pulse'>> INFILTRATING SECTORS...</p>";
+
+            // The fastest way to get data is to use the 'm.duckduckgo.com' (Mobile) version.
+            // It is much smaller than the HTML version, so the proxy fetches it faster.
+            const targetUrl = `https://m.duckduckgo.com/html/?q=${encodeURIComponent(q + " site:youtube.com")}`;
+            const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}&t=${Date.now()}`;
 
             try {
                 const response = await fetch(proxyUrl);
                 const data = await response.json();
+                
                 const parser = new DOMParser();
                 const doc = parser.parseFromString(data.contents, 'text/html');
-                const results = doc.querySelectorAll('.result');
+                const results = doc.querySelectorAll('.result-link'); // Mobile version uses different tags
 
-                document.getElementById('status-msg').innerText = "DATA EXTRACTED";
+                feed.innerHTML = ""; // Clear loader
 
-                results.forEach(res => {
-                    const titleLink = res.querySelector('.result__a');
-                    if(titleLink) {
-                        let rawHref = titleLink.getAttribute('href');
-                        let cleanUrl = rawHref.includes('uddg=') ? decodeURIComponent(rawHref.split('uddg=')[1].split('&')[0]) : rawHref;
-                        
-                        let embedUrl = "";
-                        if (cleanUrl.includes("youtube.com/watch?v=")) {
-                            const id = cleanUrl.split("v=")[1].split("&")[0];
-                            embedUrl = `https://www.youtube.com/embed/${id}`;
-                        } else if (cleanUrl.includes("dailymotion.com/video/")) {
-                            const id = cleanUrl.split("/video/")[1].split("?")[0];
-                            embedUrl = `https://www.dailymotion.com/embed/video/${id}`;
-                        }
-
-                        if (embedUrl) {
-                            const card = document.createElement('div');
-                            card.className = 'result-card';
-                            card.innerHTML = `<div class="video-viewport"><iframe src="${embedUrl}" allowfullscreen></iframe></div>
-                                <div class="card-content"><a class="result-title" href="${cleanUrl}" target="_blank">${titleLink.innerText}</a></div>`;
-                            feed.appendChild(card);
-                        }
+                results.forEach((res, index) => {
+                    if (index > 12) return; // Limit to 12 for speed
+                    
+                    const cleanUrl = res.href;
+                    if (cleanUrl.includes("v=")) {
+                        const id = cleanUrl.split("v=")[1].split("&")[0];
+                        const card = document.createElement('div');
+                        card.className = 'result-card';
+                        card.innerHTML = `
+                            <div class="video-viewport"><iframe src="https://www.youtube.com/embed/${id}" loading="lazy"></iframe></div>
+                            <div class="card-content">
+                                <a class="result-title" href="${cleanUrl}" target="_blank">${res.innerText}</a>
+                            </div>`;
+                        feed.appendChild(card);
                     }
                 });
 
-                document.getElementById('pagination-control').style.display = "block";
+                if (feed.innerHTML === "") {
+                    // Fallback for different HTML structure
+                    const fallbackResults = doc.querySelectorAll('.result__a');
+                    fallbackResults.forEach((res, index) => {
+                         if (index > 12) return;
+                         let rawHref = res.getAttribute('href');
+                         if(rawHref.includes("v=")) {
+                            const id = rawHref.split("v=")[1].split("&")[0];
+                            const card = document.createElement('div');
+                            card.className = 'result-card';
+                            card.innerHTML = `<div class="video-viewport"><iframe src="https://www.youtube.com/embed/${id}" loading="lazy"></iframe></div>
+                                              <div class="card-content"><a class="result-title" href="${rawHref}" target="_blank">${res.innerText}</a></div>`;
+                            feed.appendChild(card);
+                         }
+                    });
+                }
 
             } catch (e) {
-                document.getElementById('status-msg').innerText = "SIGNAL ERROR";
+                feed.innerHTML = "<p>> ERROR: CONNECTION TIMED OUT.</p>";
             }
         }
     </script>
