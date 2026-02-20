@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>34 DIVERSE // VELOCITY_CORE</title>
+    <title>34 DIVERSE // OMNI_FEED_V7</title>
     <style>
         body { background-color: #050a14; color: #60a5fa; font-family: 'Courier New', monospace; margin: 0; padding: 20px; }
         .terminal-header { border-bottom: 2px solid #1e3a8a; padding-bottom: 20px; text-align: center; }
@@ -10,87 +10,69 @@
         #query { background: #0d1626; border: 1px solid #1e3a8a; color: #22c55e; padding: 12px; width: 300px; outline: none; }
         .btn { background: #1e3a8a; color: white; border: 1px solid #60a5fa; padding: 12px 25px; cursor: pointer; font-weight: bold; }
         
-        #intel-feed { margin-top: 30px; display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 15px; }
-        .result-card { border: 1px solid #1e3a8a; background: #000; overflow: hidden; display: flex; flex-direction: column; }
-        .video-viewport { width: 100%; position: relative; padding-top: 56.25%; background: #050a14; }
-        .video-viewport iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; }
-        .card-content { padding: 10px; background: rgba(13, 22, 38, 0.9); }
-        .result-title { color: #22c55e; font-size: 13px; text-decoration: none; font-weight: bold; }
+        #intel-feed { margin-top: 30px; display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 20px; }
+        .intel-card { border: 1px solid #1e3a8a; background: #000; overflow: hidden; position: relative; display: flex; flex-direction: column; }
         
-        .loading-pulse { color: #22c55e; font-weight: bold; animation: blink 1s infinite; }
-        @keyframes blink { 50% { opacity: 0; } }
+        /* MEDIA WINDOW */
+        .viewport { width: 100%; position: relative; padding-top: 56.25%; background: #000; border-bottom: 1px solid #1e3a8a; }
+        .viewport iframe, .viewport img { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; }
+        
+        .card-content { padding: 15px; background: rgba(13, 22, 38, 0.95); }
+        .result-title { color: #22c55e; font-size: 14px; text-decoration: none; font-weight: bold; display: block; margin-bottom: 10px; }
+        .breach-link { color: #60a5fa; font-size: 11px; text-decoration: underline; cursor: pointer; }
     </style>
 </head>
 <body>
 
     <div class="terminal-header">
         <h1>34 DIVERSE</h1>
-        <p>> [SPEED_MODE]: <span class="loading-pulse">ACTIVE</span></p>
-        <input type="text" id="query" placeholder="IDENTIFY TARGET..." onkeydown="if(event.key==='Enter') quickBreach()">
-        <button class="btn" onclick="quickBreach()">EXECUTE</button>
+        <p>> [STATUS]: <span style="color: #22c55e;">OMNI_CONNECTION_OPEN</span></p>
+        <input type="text" id="query" placeholder="IDENTIFY TARGET (GOKU, MODS, ETC)...">
+        <button class="btn" onclick="omniBreach()">EXECUTE OMNI-SCAN</button>
     </div>
 
     <div id="intel-feed"></div>
 
     <script>
-        async function quickBreach() {
+        async function omniBreach() {
             const q = document.getElementById('query').value;
             if(!q) return;
 
             const feed = document.getElementById('intel-feed');
-            feed.innerHTML = "<p class='loading-pulse'>> INFILTRATING SECTORS...</p>";
+            feed.innerHTML = "<p>> [SCANNING MULTIPLE SECTORS]... BYPASSING CACHE...</p>";
 
-            // The fastest way to get data is to use the 'm.duckduckgo.com' (Mobile) version.
-            // It is much smaller than the HTML version, so the proxy fetches it faster.
-            const targetUrl = `https://m.duckduckgo.com/html/?q=${encodeURIComponent(q + " site:youtube.com")}`;
-            const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}&t=${Date.now()}`;
+            // Using a public Invidious instance API for lightning speed
+            // This instance allows direct searching without proxies
+            const apiUrl = `https://vid.priv.au/api/v1/search?q=${encodeURIComponent(q)}`;
 
             try {
-                const response = await fetch(proxyUrl);
-                const data = await response.json();
-                
-                const parser = new DOMParser();
-                const doc = parser.parseFromString(data.contents, 'text/html');
-                const results = doc.querySelectorAll('.result-link'); // Mobile version uses different tags
+                const response = await fetch(apiUrl);
+                const results = await response.json();
 
                 feed.innerHTML = ""; // Clear loader
 
-                results.forEach((res, index) => {
-                    if (index > 12) return; // Limit to 12 for speed
+                results.forEach(item => {
+                    if(item.type !== "video") return;
+
+                    const card = document.createElement('div');
+                    card.className = 'intel-card';
                     
-                    const cleanUrl = res.href;
-                    if (cleanUrl.includes("v=")) {
-                        const id = cleanUrl.split("v=")[1].split("&")[0];
-                        const card = document.createElement('div');
-                        card.className = 'result-card';
-                        card.innerHTML = `
-                            <div class="video-viewport"><iframe src="https://www.youtube.com/embed/${id}" loading="lazy"></iframe></div>
-                            <div class="card-content">
-                                <a class="result-title" href="${cleanUrl}" target="_blank">${res.innerText}</a>
-                            </div>`;
-                        feed.appendChild(card);
-                    }
+                    // item.videoThumbnails[0].url gives us the direct picture/gif
+                    // item.videoId gives us the player link
+                    card.innerHTML = `
+                        <div class="viewport">
+                            <iframe src="https://www.youtube.com/embed/${item.videoId}" allowfullscreen loading="lazy"></iframe>
+                        </div>
+                        <div class="card-content">
+                            <a class="result-title" href="https://youtube.com/watch?v=${item.videoId}" target="_blank">${item.title}</a>
+                            <a class="breach-link" href="https://youtube.com/watch?v=${item.videoId}" target="_blank">> EXTERNAL_BREACH_LINK</a>
+                        </div>
+                    `;
+                    feed.appendChild(card);
                 });
 
-                if (feed.innerHTML === "") {
-                    // Fallback for different HTML structure
-                    const fallbackResults = doc.querySelectorAll('.result__a');
-                    fallbackResults.forEach((res, index) => {
-                         if (index > 12) return;
-                         let rawHref = res.getAttribute('href');
-                         if(rawHref.includes("v=")) {
-                            const id = rawHref.split("v=")[1].split("&")[0];
-                            const card = document.createElement('div');
-                            card.className = 'result-card';
-                            card.innerHTML = `<div class="video-viewport"><iframe src="https://www.youtube.com/embed/${id}" loading="lazy"></iframe></div>
-                                              <div class="card-content"><a class="result-title" href="${rawHref}" target="_blank">${res.innerText}</a></div>`;
-                            feed.appendChild(card);
-                         }
-                    });
-                }
-
             } catch (e) {
-                feed.innerHTML = "<p>> ERROR: CONNECTION TIMED OUT.</p>";
+                feed.innerHTML = "<p style='color: #ef4444'>> ERROR: SIGNAL INTERRUPTED. TRYING ALTERNATE TOWER...</p>";
             }
         }
     </script>
