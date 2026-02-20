@@ -2,48 +2,51 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>34 DIVERSE // TERMINAL_V4</title>
+    <title>34 DIVERSE // INTERNAL_TERMINAL</title>
     <style>
-        body { background-color: #050a14; color: #60a5fa; font-family: 'Courier New', monospace; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        .terminal-box { border: 2px solid #1e3a8a; padding: 40px; background: rgba(13, 22, 38, 0.95); box-shadow: 0 0 30px rgba(30, 58, 138, 0.6); text-align: center; max-width: 600px; }
-        h1 { color: #22c55e; letter-spacing: 8px; margin-bottom: 10px; text-shadow: 0 0 10px #22c55e; }
-        #query { background: #0d1626; border: 1px solid #1e3a8a; color: #22c55e; padding: 15px; width: 80%; font-size: 18px; outline: none; margin-top: 20px; text-align: center; }
-        .btn { background: #1e3a8a; color: white; border: 1px solid #60a5fa; padding: 15px 40px; cursor: pointer; font-family: inherit; font-weight: bold; margin-top: 25px; transition: 0.3s; text-transform: uppercase; }
-        .btn:hover { background: #22c55e; color: #050a14; box-shadow: 0 0 20px #22c55e; border-color: #22c55e; }
-        .intel-report { font-size: 11px; color: #94a3b8; margin-top: 30px; border-top: 1px solid #1e3a8a; padding-top: 15px; }
+        body { background-color: #050a14; color: #60a5fa; font-family: 'Courier New', monospace; margin: 0; padding: 20px; overflow-x: hidden; }
+        .terminal-box { border: 2px solid #1e3a8a; padding: 20px; background: rgba(13, 22, 38, 0.95); text-align: center; margin-bottom: 20px; }
+        h1 { color: #22c55e; letter-spacing: 5px; margin: 0; }
+        #query { background: #0d1626; border: 1px solid #1e3a8a; color: #22c55e; padding: 12px; width: 60%; outline: none; margin-top: 15px; }
+        .btn { background: #1e3a8a; color: white; border: 1px solid #60a5fa; padding: 12px 25px; cursor: pointer; font-weight: bold; }
+        
+        /* THE CONTAINMENT WINDOW */
+        #display-perimeter { 
+            width: 100%; 
+            height: 75vh; 
+            border: 2px solid #1e3a8a; 
+            background: #fff; 
+            display: none; 
+        }
     </style>
 </head>
 <body>
 
     <div class="terminal-box">
         <h1>34 DIVERSE</h1>
-        <p>> [SYSTEM]: <span style="color: #22c55e;">SIGNAL_STABLE</span></p>
-        <p>> [MODE]: <span style="color: #60a5fa;">INFINITE_SCROLL_OVERRIDE</span></p>
+        <p>> [SYSTEM]: <span style="color: #22c55e;">CONTAINMENT_MODE_ACTIVE</span></p>
         
-        <input type="text" id="query" placeholder="IDENTIFY TARGET (GOKU, ETC)" onkeydown="if(event.key==='Enter') launchScan()">
-        <br>
-        <button class="btn" onclick="launchScan()">Execute Deep Scan</button>
-
-        <div class="intel-report">
-            TARGETING: GAMEBANANA | YOUTUBE | MEDIAFIRE | GLOBAL ARCHIVES<br>
-            SECURITY: IFRAME_BYPASS_ACTIVE | ANONYMOUS_ROUTING
-        </div>
+        <input type="text" id="query" placeholder="IDENTIFY TARGET..." onkeydown="if(event.key==='Enter') launchInternalScan()">
+        <button class="btn" onclick="launchInternalScan()">EXECUTE INTERNAL SCAN</button>
     </div>
 
+    <iframe id="display-perimeter" name="display-perimeter"></iframe>
+
     <script>
-        function launchScan() {
+        function launchInternalScan() {
             const target = document.getElementById('query').value;
             if(!target) return alert("Agent, input target name.");
 
-            // This tells DuckDuckGo exactly where to look
             const sectors = "site:gamebanana.com OR site:youtube.com OR site:mediafire.com";
             const dork = `${sectors} inurl:view ${target} -inurl:image`;
             
-            // This URL triggers the "Video/Media" portal for infinite scrolling
-            const searchUrl = `https://duckduckgo.com/?q=${encodeURIComponent(dork)}&ia=videos&iax=videos`;
+            // We are using the 'Lite' URL here because DuckDuckGo's main site 
+            // HARD BLOCKS being put inside other websites. Lite is more flexible.
+            const searchUrl = `https://duckduckgo.com/lite/?q=${encodeURIComponent(dork)}`;
             
-            // THE FIX: Open in a new tab to bypass 'SAMEORIGIN' blocks
-            window.open(searchUrl, '_blank');
+            const frame = document.getElementById('display-perimeter');
+            frame.style.display = "block";
+            frame.src = searchUrl;
         }
     </script>
 
