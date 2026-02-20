@@ -2,40 +2,25 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>34 DIVERSE // ORIGINAL_STATION</title>
+    <title>34 DIVERSE // ORIGINAL_RECON</title>
     <style>
-        body { background-color: #050a14; color: #60a5fa; font-family: 'Courier New', monospace; margin: 0; padding: 20px; }
-        .terminal-header { border-bottom: 2px solid #1e3a8a; padding-bottom: 15px; margin-bottom: 20px; }
+        body { background-color: #050a14; color: #60a5fa; font-family: 'Courier New', monospace; padding: 20px; }
+        .terminal-box { border: 1px solid #1e3a8a; padding: 20px; background: rgba(13, 22, 38, 0.9); margin-bottom: 20px; }
         h1 { color: #22c55e; letter-spacing: 5px; }
-        #query { background: #0d1626; border: 1px solid #1e3a8a; color: #22c55e; padding: 12px; width: 300px; outline: none; }
-        .btn { background: #1e3a8a; color: white; border: 1px solid #60a5fa; padding: 12px 25px; cursor: pointer; font-family: inherit; }
-        
-        #display-frame { width: 100%; height: 80vh; border: 1px solid #1e3a8a; background: #fff; margin-top: 20px; }
+        /* Styling the Google search box to fit the terminal */
+        .gcse-search { margin-top: 20px; }
     </style>
 </head>
 <body>
 
-    <div class="terminal-header">
+    <div class="terminal-box">
         <h1>34 DIVERSE</h1>
-        <p>> [SYSTEM]: <span style="color: #22c55e;">RESTORED_TO_FIRST_CONTACT</span></p>
-        
-        <form action="https://duckduckgo.com/" method="GET" target="results-frame" id="searchForm">
-            <input type="text" name="q" id="query" placeholder="IDENTIFY TARGET...">
-            <button type="submit" class="btn">INITIALIZE SCAN</button>
-        </form>
+        <p>> [SYSTEM]: <span style="color: #e11d48;">ROLLBACK_COMPLETE</span></p>
+        <p>> [STATUS]: ANALYZING_ORIGINAL_WIDGET_ERRORS...</p>
     </div>
 
-    <iframe name="results-frame" id="display-frame"></iframe>
-
-    <script>
-        const form = document.getElementById('searchForm');
-        form.onsubmit = function() {
-            const input = document.getElementById('query');
-            // This adds your mod-hunting logic to the end of whatever you type
-            const dork = " site:gamebanana.com inurl:view";
-            input.value = input.value + dork;
-        };
-    </script>
+    <script async src="https://cse.google.com/cse.js?cx=009717e1737854e57"></script>
+    <div class="gcse-search"></div>
 
 </body>
 </html>
