@@ -2,51 +2,47 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>34 DIVERSE // MEDIA_SCRAPER</title>
+    <title>34 DIVERSE // FINAL_EXTRACTION</title>
     <style>
         body { background-color: #050a14; color: #60a5fa; font-family: 'Courier New', monospace; padding: 20px; }
         .terminal-header { border-bottom: 2px solid #1e3a8a; padding-bottom: 20px; text-align: center; }
         h1 { color: #22c55e; letter-spacing: 5px; text-shadow: 0 0 10px #22c55e; }
         #query { background: #0d1626; border: 1px solid #1e3a8a; color: #22c55e; padding: 12px; width: 300px; outline: none; }
-        .btn { background: #1e3a8a; color: white; border: 1px solid #60a5fa; padding: 12px 25px; cursor: pointer; font-weight: bold; }
+        .btn { background: #1e3a8a; color: white; border: 1px solid #60a5fa; padding: 12px 25px; cursor: pointer; }
         
-        /* THE NEW MEDIA GRID */
-        #intel-feed { margin-top: 30px; display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
-        .result-card { border: 1px solid #1e3a8a; background: rgba(13, 22, 38, 0.9); overflow: hidden; display: flex; flex-direction: column; }
-        .result-card:hover { border-color: #22c55e; transform: translateY(-3px); transition: 0.3s; }
+        #intel-feed { margin-top: 30px; display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
+        .result-card { border: 1px solid #1e3a8a; background: rgba(13, 22, 38, 0.9); display: flex; flex-direction: column; transition: 0.3s; }
+        .result-card:hover { border-color: #22c55e; box-shadow: 0 0 15px #22c55e; }
         
-        /* IMAGE PREVIEW AREA */
-        .preview-box { height: 150px; background: #050a14; display: flex; align-items: center; justify-content: center; overflow: hidden; border-bottom: 1px solid #1e3a8a; }
-        .preview-box img { width: 100%; height: 100%; object-fit: cover; opacity: 0.8; }
-        .preview-box .no-img { font-size: 10px; color: #1e3a8a; }
+        .preview-box { height: 160px; background: #000; overflow: hidden; border-bottom: 1px solid #1e3a8a; }
+        .preview-box img { width: 100%; height: 100%; object-fit: cover; opacity: 0.7; }
 
         .card-content { padding: 15px; }
-        .result-title { color: #22c55e; font-size: 16px; text-decoration: none; font-weight: bold; display: block; margin-bottom: 8px; }
-        .result-snippet { color: #94a3b8; font-size: 12px; line-height: 1.4; height: 50px; overflow: hidden; }
+        .result-title { color: #22c55e; font-size: 16px; text-decoration: none; font-weight: bold; display: block; margin-bottom: 10px; }
+        .result-snippet { color: #94a3b8; font-size: 12px; height: 60px; overflow: hidden; }
     </style>
 </head>
 <body>
 
     <div class="terminal-header">
         <h1>34 DIVERSE</h1>
-        <p>> [SYSTEM]: <span style="color: #22c55e;">DEEP_MEDIA_EXTRACTION_ON</span></p>
-        <input type="text" id="query" placeholder="IDENTIFY TARGET (MODS, ART, ETC)...">
-        <button class="btn" onclick="runMediaScraper()">RUN EXTRACTION</button>
+        <p>> [SYSTEM]: <span style="color: #22c55e;">LINK_RECONSTRUCTION_ACTIVE</span></p>
+        <input type="text" id="query" placeholder="IDENTIFY TARGET...">
+        <button class="btn" onclick="runFixedScraper()">EXECUTE SCAN</button>
     </div>
 
     <div id="intel-feed">
-        <p>> Terminal online. Awaiting data requests...</p>
+        <p>> Awaiting coordinates...</p>
     </div>
 
     <script>
-        async function runMediaScraper() {
+        async function runFixedScraper() {
             const target = document.getElementById('query').value;
             if(!target) return;
 
             const feed = document.getElementById('intel-feed');
-            feed.innerHTML = "<p>> [EXTRACTING MEDIA BUNDLES]... BYPASSING CDN...</p>";
+            feed.innerHTML = "<p>> [RECONSTRUCTING DATA FLOWS]...</p>";
 
-            // Pointing to DuckDuckGo's HTML search
             const targetUrl = `https://duckduckgo.com/html/?q=${encodeURIComponent(target + " site:gamebanana.com")}`;
             const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}`;
 
@@ -61,23 +57,31 @@
                 feed.innerHTML = "";
 
                 results.forEach(res => {
-                    const titleObj = res.querySelector('.result__a');
+                    const titleLink = res.querySelector('.result__a');
                     const snippet = res.querySelector('.result__snippet');
                     
-                    // Attempting to find a thumbnail (DuckDuckGo often uses icons)
-                    const icon = res.querySelector('.result__icon__img');
-                    const imgUrl = icon ? icon.src : null;
+                    if(titleLink) {
+                        // FIX: Ensure the link is absolute so it doesn't stay on your site
+                        let finalUrl = titleLink.href;
+                        if (finalUrl.startsWith('window.location')) {
+                            // Extract URL from DuckDuckGo redirect string if necessary
+                            finalUrl = finalUrl.match(/http[^&]+/)[0];
+                        } else if (!finalUrl.startsWith('http')) {
+                            finalUrl = "https://duckduckgo.com" + finalUrl;
+                        }
 
-                    if(titleObj) {
+                        // TACTICAL VISUAL: Use a Screenshot API to show the mod page
+                        const screenshotUrl = `https://s0.wp.com/mshots/v1/${encodeURIComponent(finalUrl)}?w=400`;
+
                         const card = document.createElement('div');
                         card.className = 'result-card';
                         card.innerHTML = `
                             <div class="preview-box">
-                                ${imgUrl ? `<img src="${imgUrl}" alt="preview">` : `<div class="no-img">[ NO MEDIA SIGNAL ]</div>`}
+                                <img src="${screenshotUrl}" alt="Intel Preview" onerror="this.src='https://via.placeholder.com/400x200/050a14/1e3a8a?text=NO+SIGNAL'">
                             </div>
                             <div class="card-content">
-                                <a class="result-title" href="${titleObj.href}" target="_blank">${titleObj.innerText}</a>
-                                <div class="result-snippet">${snippet ? snippet.innerText : 'No intel snippet available.'}</div>
+                                <a class="result-title" href="${finalUrl}" target="_blank">${titleLink.innerText}</a>
+                                <div class="result-snippet">${snippet ? snippet.innerText : 'Scanning...'}</div>
                             </div>
                         `;
                         feed.appendChild(card);
@@ -85,7 +89,7 @@
                 });
 
             } catch (error) {
-                feed.innerHTML = "<p style='color: #e11d48;'>> ERROR: MEDIA STREAM REFUSED.</p>";
+                feed.innerHTML = "<p style='color: #e11d48;'>> ERROR: SECTOR JAMMED.</p>";
             }
         }
     </script>
