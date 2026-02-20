@@ -2,53 +2,80 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>34 DIVERSE // INTERNAL_TERMINAL</title>
+    <title>34 DIVERSE // DATA_EXTRACTOR</title>
     <style>
-        body { background-color: #050a14; color: #60a5fa; font-family: 'Courier New', monospace; margin: 0; padding: 20px; overflow-x: hidden; }
-        .terminal-box { border: 2px solid #1e3a8a; padding: 20px; background: rgba(13, 22, 38, 0.95); text-align: center; margin-bottom: 20px; }
+        body { background-color: #050a14; color: #60a5fa; font-family: 'Courier New', monospace; margin: 0; padding: 20px; }
+        .terminal-header { border-bottom: 2px solid #1e3a8a; padding-bottom: 20px; margin-bottom: 30px; text-align: center; }
         h1 { color: #22c55e; letter-spacing: 5px; margin: 0; }
-        #query { background: #0d1626; border: 1px solid #1e3a8a; color: #22c55e; padding: 12px; width: 60%; outline: none; margin-top: 15px; }
+        .input-group { margin-top: 20px; }
+        #query { background: #0d1626; border: 1px solid #1e3a8a; color: #22c55e; padding: 12px; width: 300px; outline: none; }
         .btn { background: #1e3a8a; color: white; border: 1px solid #60a5fa; padding: 12px 25px; cursor: pointer; font-weight: bold; }
-        
-        /* THE CONTAINMENT WINDOW */
-        #display-perimeter { 
-            width: 100%; 
-            height: 75vh; 
-            border: 2px solid #1e3a8a; 
-            background: #fff; 
-            display: none; 
-        }
+        .btn:hover { background: #22c55e; color: #050a14; }
+
+        /* THE INTEL GRID */
+        #intel-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
+        .intel-card { border: 1px solid #1e3a8a; background: rgba(13, 22, 38, 0.8); padding: 20px; position: relative; transition: 0.3s; }
+        .intel-card:hover { border-color: #22c55e; box-shadow: 0 0 15px rgba(34, 197, 94, 0.3); }
+        .intel-card h3 { color: #22c55e; margin: 0 0 10px 0; font-size: 16px; text-transform: uppercase; }
+        .intel-card p { font-size: 13px; line-height: 1.4; color: #94a3b8; margin-bottom: 15px; }
+        .breach-button { display: inline-block; padding: 8px 15px; background: #1e3a8a; color: #fff; text-decoration: none; font-size: 12px; border: 1px solid #60a5fa; }
+        .breach-button:hover { background: #60a5fa; color: #050a14; }
+        .loading-text { color: #22c55e; text-align: center; width: 100%; padding: 40px; }
     </style>
 </head>
 <body>
 
-    <div class="terminal-box">
+    <div class="terminal-header">
         <h1>34 DIVERSE</h1>
-        <p>> [SYSTEM]: <span style="color: #22c55e;">CONTAINMENT_MODE_ACTIVE</span></p>
-        
-        <input type="text" id="query" placeholder="IDENTIFY TARGET..." onkeydown="if(event.key==='Enter') launchInternalScan()">
-        <button class="btn" onclick="launchInternalScan()">EXECUTE INTERNAL SCAN</button>
+        <p>> [STATUS]: <span style="color: #22c55e;">INTERNAL_EXTRACTION_ACTIVE</span></p>
+        <div class="input-group">
+            <input type="text" id="query" placeholder="IDENTIFY TARGET..." onkeydown="if(event.key==='Enter') startExtraction()">
+            <button class="btn" onclick="startExtraction()">START EXTRACTION</button>
+        </div>
     </div>
 
-    <iframe id="display-perimeter" name="display-perimeter"></iframe>
+    <div id="intel-grid">
+        <p style="color: #94a3b8;">> System idle. Awaiting target coordinates...</p>
+    </div>
 
     <script>
-        function launchInternalScan() {
+        async function startExtraction() {
             const target = document.getElementById('query').value;
-            if(!target) return alert("Agent, input target name.");
+            if(!target) return;
 
-            const sectors = "site:gamebanana.com OR site:youtube.com OR site:mediafire.com";
-            const dork = `${sectors} inurl:view ${target} -inurl:image`;
-            
-            // We are using the 'Lite' URL here because DuckDuckGo's main site 
-            // HARD BLOCKS being put inside other websites. Lite is more flexible.
-            const searchUrl = `https://duckduckgo.com/lite/?q=${encodeURIComponent(dork)}`;
-            
-            const frame = document.getElementById('display-perimeter');
-            frame.style.display = "block";
-            frame.src = searchUrl;
+            const grid = document.getElementById('intel-grid');
+            grid.innerHTML = '<div class="loading-text">> BYPASSING FIREWALLS... SCRAPING SECTORS...</div>';
+
+            // We use DuckDuckGo's Instant Answer API to pull raw data instead of a website
+            const apiUrl = `https://api.duckduckgo.com/?q=${encodeURIComponent(target + " gamebanana mods")}&format=json&no_html=1&skip_disambig=1`;
+
+            try {
+                const response = await fetch(apiUrl);
+                const data = await response.json();
+                
+                grid.innerHTML = ''; // Clear status
+
+                // Extracting "Related Topics" which contain the external links and snippets
+                if (data.RelatedTopics && data.RelatedTopics.length > 0) {
+                    data.RelatedTopics.forEach(item => {
+                        if (item.Text && item.FirstURL) {
+                            const card = document.createElement('div');
+                            card.className = 'intel-card';
+                            card.innerHTML = `
+                                <h3>Data Found</h3>
+                                <p>${item.Text}</p>
+                                <a href="${item.FirstURL}" target="_blank" class="breach-button">BREACH LINK</a>
+                            `;
+                            grid.appendChild(card);
+                        }
+                    });
+                } else {
+                    grid.innerHTML = '<p style="color: #e11d48;">> NO DIRECT DATA STREAM FOUND. TRY A DIFFERENT TARGET.</p>';
+                }
+            } catch (error) {
+                grid.innerHTML = '<p style="color: #e11d48;">> ERROR: CONNECTION INTERRUPTED BY EXTERNAL HOST.</p>';
+            }
         }
     </script>
-
 </body>
 </html>
