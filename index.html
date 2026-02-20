@@ -2,82 +2,90 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>34 DIVERSE // SCRAPER_TERMINAL</title>
+    <title>34 DIVERSE // MEDIA_SCRAPER</title>
     <style>
         body { background-color: #050a14; color: #60a5fa; font-family: 'Courier New', monospace; padding: 20px; }
         .terminal-header { border-bottom: 2px solid #1e3a8a; padding-bottom: 20px; text-align: center; }
-        h1 { color: #22c55e; letter-spacing: 5px; }
+        h1 { color: #22c55e; letter-spacing: 5px; text-shadow: 0 0 10px #22c55e; }
         #query { background: #0d1626; border: 1px solid #1e3a8a; color: #22c55e; padding: 12px; width: 300px; outline: none; }
-        .btn { background: #1e3a8a; color: white; border: 1px solid #60a5fa; padding: 12px 25px; cursor: pointer; }
+        .btn { background: #1e3a8a; color: white; border: 1px solid #60a5fa; padding: 12px 25px; cursor: pointer; font-weight: bold; }
         
-        /* THE RESULTS DISPLAY */
-        #intel-feed { margin-top: 30px; display: grid; gap: 15px; }
-        .result-item { border: 1px solid #1e3a8a; padding: 15px; background: rgba(13, 22, 38, 0.8); }
-        .result-item:hover { border-color: #22c55e; }
-        .result-title { color: #22c55e; font-size: 18px; text-decoration: none; display: block; }
-        .result-snippet { color: #94a3b8; font-size: 13px; margin-top: 5px; }
+        /* THE NEW MEDIA GRID */
+        #intel-feed { margin-top: 30px; display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
+        .result-card { border: 1px solid #1e3a8a; background: rgba(13, 22, 38, 0.9); overflow: hidden; display: flex; flex-direction: column; }
+        .result-card:hover { border-color: #22c55e; transform: translateY(-3px); transition: 0.3s; }
+        
+        /* IMAGE PREVIEW AREA */
+        .preview-box { height: 150px; background: #050a14; display: flex; align-items: center; justify-content: center; overflow: hidden; border-bottom: 1px solid #1e3a8a; }
+        .preview-box img { width: 100%; height: 100%; object-fit: cover; opacity: 0.8; }
+        .preview-box .no-img { font-size: 10px; color: #1e3a8a; }
+
+        .card-content { padding: 15px; }
+        .result-title { color: #22c55e; font-size: 16px; text-decoration: none; font-weight: bold; display: block; margin-bottom: 8px; }
+        .result-snippet { color: #94a3b8; font-size: 12px; line-height: 1.4; height: 50px; overflow: hidden; }
     </style>
 </head>
 <body>
 
     <div class="terminal-header">
         <h1>34 DIVERSE</h1>
-        <p>> [SYSTEM]: <span style="color: #22c55e;">SCRAPER_PROXIES_ENGAGED</span></p>
-        <input type="text" id="query" placeholder="IDENTIFY TARGET...">
-        <button class="btn" onclick="runScraper()">EXECUTE SCRAPE</button>
+        <p>> [SYSTEM]: <span style="color: #22c55e;">DEEP_MEDIA_EXTRACTION_ON</span></p>
+        <input type="text" id="query" placeholder="IDENTIFY TARGET (MODS, ART, ETC)...">
+        <button class="btn" onclick="runMediaScraper()">RUN EXTRACTION</button>
     </div>
 
     <div id="intel-feed">
-        <p>> Awaiting extraction orders...</p>
+        <p>> Terminal online. Awaiting data requests...</p>
     </div>
 
     <script>
-        async function runScraper() {
+        async function runMediaScraper() {
             const target = document.getElementById('query').value;
             if(!target) return;
 
             const feed = document.getElementById('intel-feed');
-            feed.innerHTML = "<p>> [EXTRACTING DATA VIA PROXY]... PLEASE WAIT...</p>";
+            feed.innerHTML = "<p>> [EXTRACTING MEDIA BUNDLES]... BYPASSING CDN...</p>";
 
-            // The URL we want to scrape (DuckDuckGo HTML version)
+            // Pointing to DuckDuckGo's HTML search
             const targetUrl = `https://duckduckgo.com/html/?q=${encodeURIComponent(target + " site:gamebanana.com")}`;
-            
-            // The Scraper Bridge (AllOrigins)
             const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}`;
 
             try {
                 const response = await fetch(proxyUrl);
                 const data = await response.json();
                 
-                // Converting the raw string into something we can search through
                 const parser = new DOMParser();
                 const doc = parser.parseFromString(data.contents, 'text/html');
                 const results = doc.querySelectorAll('.result');
 
-                feed.innerHTML = ""; // Clear status
-
-                if(results.length === 0) {
-                    feed.innerHTML = "<p>> NO DATA EXTRACTED. THE PROXY MAY BE BLOCKED.</p>";
-                    return;
-                }
+                feed.innerHTML = "";
 
                 results.forEach(res => {
                     const titleObj = res.querySelector('.result__a');
                     const snippet = res.querySelector('.result__snippet');
                     
+                    // Attempting to find a thumbnail (DuckDuckGo often uses icons)
+                    const icon = res.querySelector('.result__icon__img');
+                    const imgUrl = icon ? icon.src : null;
+
                     if(titleObj) {
-                        const div = document.createElement('div');
-                        div.className = 'result-item';
-                        div.innerHTML = `
-                            <a class="result-title" href="${titleObj.href}" target="_blank">${titleObj.innerText}</a>
-                            <div class="result-snippet">${snippet ? snippet.innerText : ''}</div>
+                        const card = document.createElement('div');
+                        card.className = 'result-card';
+                        card.innerHTML = `
+                            <div class="preview-box">
+                                ${imgUrl ? `<img src="${imgUrl}" alt="preview">` : `<div class="no-img">[ NO MEDIA SIGNAL ]</div>`}
+                            </div>
+                            <div class="card-content">
+                                <a class="result-title" href="${titleObj.href}" target="_blank">${titleObj.innerText}</a>
+                                <div class="result-snippet">${snippet ? snippet.innerText : 'No intel snippet available.'}</div>
+                            </div>
                         `;
-                        feed.appendChild(div);
+                        feed.appendChild(card);
                     }
                 });
 
             } catch (error) {
-                feed.innerHTML = "<p style='color: #e11d48;'>> ERROR: EXTRACTION FAILED. PROXY DOWN.</p>";
+                feed.innerHTML = "<p style='color: #e11d48;'>> ERROR: MEDIA STREAM REFUSED.</p>";
             }
         }
     </script>
