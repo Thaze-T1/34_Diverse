@@ -2,35 +2,50 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>34 DIVERSE // INFINITE_TERMINAL</title>
+    <title>34 DIVERSE // TERMINAL_V4</title>
     <style>
-        body { background-color: #050a14; color: #60a5fa; font-family: 'Courier New', monospace; margin: 0; padding: 20px; }
-        .header { border-bottom: 2px solid #1e3a8a; padding-bottom: 15px; margin-bottom: 20px; }
-        #query { background: #0d1626; border: 1px solid #1e3a8a; color: #22c55e; padding: 12px; width: 300px; outline: none; }
-        .btn { background: #1e3a8a; color: white; border: 1px solid #60a5fa; padding: 12px 20px; cursor: pointer; font-family: inherit; }
-        .btn:hover { background: #60a5fa; color: #050a14; }
-        #results-area { width: 100%; height: 85vh; margin-top: 20px; border: 1px solid #1e3a8a; background: #000; }
-        iframe { width: 100%; height: 100%; border: none; }
+        body { background-color: #050a14; color: #60a5fa; font-family: 'Courier New', monospace; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .terminal-box { border: 2px solid #1e3a8a; padding: 40px; background: rgba(13, 22, 38, 0.95); box-shadow: 0 0 30px rgba(30, 58, 138, 0.6); text-align: center; max-width: 600px; }
+        h1 { color: #22c55e; letter-spacing: 8px; margin-bottom: 10px; text-shadow: 0 0 10px #22c55e; }
+        #query { background: #0d1626; border: 1px solid #1e3a8a; color: #22c55e; padding: 15px; width: 80%; font-size: 18px; outline: none; margin-top: 20px; text-align: center; }
+        .btn { background: #1e3a8a; color: white; border: 1px solid #60a5fa; padding: 15px 40px; cursor: pointer; font-family: inherit; font-weight: bold; margin-top: 25px; transition: 0.3s; text-transform: uppercase; }
+        .btn:hover { background: #22c55e; color: #050a14; box-shadow: 0 0 20px #22c55e; border-color: #22c55e; }
+        .intel-report { font-size: 11px; color: #94a3b8; margin-top: 30px; border-top: 1px solid #1e3a8a; padding-top: 15px; }
     </style>
 </head>
 <body>
-    <div class="header">
-        <p>> [34-D] STATUS: <span style="color: #22c55e;">UNLIMITED_INTEL_ACTIVE</span></p>
-        <input type="text" id="query" placeholder="Enter Target (e.g. Deadpool)...">
-        <button class="btn" onclick="launchScan()">INITIALIZE SCAN</button>
+
+    <div class="terminal-box">
+        <h1>34 DIVERSE</h1>
+        <p>> [SYSTEM]: <span style="color: #22c55e;">SIGNAL_STABLE</span></p>
+        <p>> [MODE]: <span style="color: #60a5fa;">INFINITE_SCROLL_OVERRIDE</span></p>
+        
+        <input type="text" id="query" placeholder="IDENTIFY TARGET (GOKU, ETC)" onkeydown="if(event.key==='Enter') launchScan()">
+        <br>
+        <button class="btn" onclick="launchScan()">Execute Deep Scan</button>
+
+        <div class="intel-report">
+            TARGETING: GAMEBANANA | YOUTUBE | MEDIAFIRE | GLOBAL ARCHIVES<br>
+            SECURITY: IFRAME_BYPASS_ACTIVE | ANONYMOUS_ROUTING
+        </div>
     </div>
-    <div id="results-area">
-        <iframe id="searchFrame" src="about:blank"></iframe>
-    </div>
+
     <script>
         function launchScan() {
             const target = document.getElementById('query').value;
             if(!target) return alert("Agent, input target name.");
-            // THE MASTER DORK: view discovery + video focus
-            const dork = `inurl:view (video OR mp4 OR player) ${target} -inurl:image`;
-            const ddgUrl = `https://duckduckgo.com/?q=${encodeURIComponent(dork)}&ia=videos&iax=videos`;
-            document.getElementById('searchFrame').src = ddgUrl;
+
+            // This tells DuckDuckGo exactly where to look
+            const sectors = "site:gamebanana.com OR site:youtube.com OR site:mediafire.com";
+            const dork = `${sectors} inurl:view ${target} -inurl:image`;
+            
+            // This URL triggers the "Video/Media" portal for infinite scrolling
+            const searchUrl = `https://duckduckgo.com/?q=${encodeURIComponent(dork)}&ia=videos&iax=videos`;
+            
+            // THE FIX: Open in a new tab to bypass 'SAMEORIGIN' blocks
+            window.open(searchUrl, '_blank');
         }
     </script>
+
 </body>
 </html>
