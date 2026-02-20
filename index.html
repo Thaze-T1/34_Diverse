@@ -2,94 +2,100 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>34 DIVERSE // FINAL_EXTRACTION</title>
+    <title>34 DIVERSE // VIDEO_SECTOR_TEST</title>
     <style>
         body { background-color: #050a14; color: #60a5fa; font-family: 'Courier New', monospace; padding: 20px; }
         .terminal-header { border-bottom: 2px solid #1e3a8a; padding-bottom: 20px; text-align: center; }
         h1 { color: #22c55e; letter-spacing: 5px; text-shadow: 0 0 10px #22c55e; }
         #query { background: #0d1626; border: 1px solid #1e3a8a; color: #22c55e; padding: 12px; width: 300px; outline: none; }
-        .btn { background: #1e3a8a; color: white; border: 1px solid #60a5fa; padding: 12px 25px; cursor: pointer; }
+        .btn { background: #1e3a8a; color: white; border: 1px solid #60a5fa; padding: 12px 25px; cursor: pointer; font-weight: bold; }
         
-        #intel-feed { margin-top: 30px; display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
-        .result-card { border: 1px solid #1e3a8a; background: rgba(13, 22, 38, 0.9); display: flex; flex-direction: column; transition: 0.3s; }
-        .result-card:hover { border-color: #22c55e; box-shadow: 0 0 15px #22c55e; }
+        #intel-feed { margin-top: 30px; display: grid; grid-template-columns: repeat(auto-fill, minmax(400px, 1fr)); gap: 20px; }
+        .result-card { border: 1px solid #1e3a8a; background: #000; overflow: hidden; display: flex; flex-direction: column; }
         
-        .preview-box { height: 160px; background: #000; overflow: hidden; border-bottom: 1px solid #1e3a8a; }
-        .preview-box img { width: 100%; height: 100%; object-fit: cover; opacity: 0.7; }
+        /* VIDEO VIEWPORT - Forced 16:9 Aspect Ratio */
+        .video-viewport { width: 100%; position: relative; padding-top: 56.25%; background: #050a14; }
+        .video-viewport iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; }
 
-        .card-content { padding: 15px; }
-        .result-title { color: #22c55e; font-size: 16px; text-decoration: none; font-weight: bold; display: block; margin-bottom: 10px; }
-        .result-snippet { color: #94a3b8; font-size: 12px; height: 60px; overflow: hidden; }
+        .card-content { padding: 15px; background: rgba(13, 22, 38, 0.9); }
+        .result-title { color: #22c55e; font-size: 14px; text-decoration: none; font-weight: bold; display: block; margin-bottom: 5px; }
+        .sector-badge { font-size: 9px; padding: 2px 6px; border: 1px solid #60a5fa; color: #60a5fa; text-transform: uppercase; }
     </style>
 </head>
 <body>
 
     <div class="terminal-header">
         <h1>34 DIVERSE</h1>
-        <p>> [SYSTEM]: <span style="color: #22c55e;">LINK_RECONSTRUCTION_ACTIVE</span></p>
-        <input type="text" id="query" placeholder="IDENTIFY TARGET...">
-        <button class="btn" onclick="runFixedScraper()">EXECUTE SCAN</button>
+        <p>> [SYSTEM]: <span style="color: #22c55e;">MULTI_VIDEO_INFILTRATION_READY</span></p>
+        <input type="text" id="query" placeholder="SEARCH YOUTUBE / DAILYMOTION...">
+        <button class="btn" onclick="executeVideoBreach()">BREACH VIDEOS</button>
     </div>
 
     <div id="intel-feed">
-        <p>> Awaiting coordinates...</p>
+        <p>> System idle. Waiting for video coordinates...</p>
     </div>
 
     <script>
-        async function runFixedScraper() {
+        async function executeVideoBreach() {
             const target = document.getElementById('query').value;
             if(!target) return;
-
             const feed = document.getElementById('intel-feed');
-            feed.innerHTML = "<p>> [RECONSTRUCTING DATA FLOWS]...</p>";
+            feed.innerHTML = "<p>> [SCANNED SECTORS: YT, DM, VM]... EXTRACTING STREAMS...</p>";
 
-            const targetUrl = `https://duckduckgo.com/html/?q=${encodeURIComponent(target + " site:gamebanana.com")}`;
-            const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}`;
+            // Broad search for video assets
+            const queryUrl = `${target} site:youtube.com OR site:dailymotion.com OR site:vimeo.com`;
+            const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(`https://duckduckgo.com/html/?q=${encodeURIComponent(queryUrl)}`)}`;
 
             try {
                 const response = await fetch(proxyUrl);
                 const data = await response.json();
-                
                 const parser = new DOMParser();
                 const doc = parser.parseFromString(data.contents, 'text/html');
                 const results = doc.querySelectorAll('.result');
-
                 feed.innerHTML = "";
 
                 results.forEach(res => {
                     const titleLink = res.querySelector('.result__a');
-                    const snippet = res.querySelector('.result__snippet');
-                    
                     if(titleLink) {
-                        // FIX: Ensure the link is absolute so it doesn't stay on your site
-                        let finalUrl = titleLink.href;
-                        if (finalUrl.startsWith('window.location')) {
-                            // Extract URL from DuckDuckGo redirect string if necessary
-                            finalUrl = finalUrl.match(/http[^&]+/)[0];
-                        } else if (!finalUrl.startsWith('http')) {
-                            finalUrl = "https://duckduckgo.com" + finalUrl;
+                        let rawHref = titleLink.getAttribute('href');
+                        let cleanUrl = rawHref.includes('uddg=') ? decodeURIComponent(rawHref.split('uddg=')[1].split('&')[0]) : rawHref;
+                        
+                        let embedUrl = "";
+                        let sector = "Unknown";
+
+                        // Sector Detection & Embed Mapping
+                        if (cleanUrl.includes("youtube.com/watch?v=")) {
+                            const id = cleanUrl.split("v=")[1].split("&")[0];
+                            embedUrl = `https://www.youtube.com/embed/${id}`;
+                            sector = "YouTube";
+                        } else if (cleanUrl.includes("dailymotion.com/video/")) {
+                            const id = cleanUrl.split("/video/")[1].split("?")[0];
+                            embedUrl = `https://www.dailymotion.com/embed/video/${id}`;
+                            sector = "Dailymotion";
+                        } else if (cleanUrl.includes("vimeo.com/")) {
+                            const id = cleanUrl.split("vimeo.com/")[1].split("?")[0];
+                            embedUrl = `https://player.vimeo.com/video/${id}`;
+                            sector = "Vimeo";
                         }
 
-                        // TACTICAL VISUAL: Use a Screenshot API to show the mod page
-                        const screenshotUrl = `https://s0.wp.com/mshots/v1/${encodeURIComponent(finalUrl)}?w=400`;
-
-                        const card = document.createElement('div');
-                        card.className = 'result-card';
-                        card.innerHTML = `
-                            <div class="preview-box">
-                                <img src="${screenshotUrl}" alt="Intel Preview" onerror="this.src='https://via.placeholder.com/400x200/050a14/1e3a8a?text=NO+SIGNAL'">
-                            </div>
-                            <div class="card-content">
-                                <a class="result-title" href="${finalUrl}" target="_blank">${titleLink.innerText}</a>
-                                <div class="result-snippet">${snippet ? snippet.innerText : 'Scanning...'}</div>
-                            </div>
-                        `;
-                        feed.appendChild(card);
+                        if (embedUrl) {
+                            const card = document.createElement('div');
+                            card.className = 'result-card';
+                            card.innerHTML = `
+                                <div class="video-viewport">
+                                    <iframe src="${embedUrl}" allowfullscreen></iframe>
+                                </div>
+                                <div class="card-content">
+                                    <span class="sector-badge">${sector}</span>
+                                    <a class="result-title" href="${cleanUrl}" target="_blank">${titleLink.innerText}</a>
+                                </div>
+                            `;
+                            feed.appendChild(card);
+                        }
                     }
                 });
-
-            } catch (error) {
-                feed.innerHTML = "<p style='color: #e11d48;'>> ERROR: SECTOR JAMMED.</p>";
+            } catch (e) {
+                feed.innerHTML = "<p>> ERROR: SIGNAL JAMMED.</p>";
             }
         }
     </script>
