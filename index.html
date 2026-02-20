@@ -2,45 +2,76 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>34 DIVERSE // RECON_V5</title>
+    <title>34 DIVERSE // LIVE_INTEL_GALLERY</title>
     <style>
-        body { background-color: #050a14; color: #60a5fa; font-family: 'Courier New', monospace; padding: 20px; }
-        .terminal-box { border: 2px solid #1e3a8a; padding: 20px; background: #0d1626; }
-        #query { background: #050a14; border: 1px solid #1e3a8a; color: #22c55e; padding: 10px; width: 250px; }
-        .btn { background: #1e3a8a; color: white; padding: 10px 20px; cursor: pointer; border: none; }
-        #results-frame { width: 100%; height: 600px; margin-top: 20px; border: 1px solid #1e3a8a; background: white; }
+        body { background-color: #050a14; color: #60a5fa; font-family: 'Courier New', monospace; padding: 20px; margin: 0; }
+        .terminal-header { border-bottom: 2px solid #1e3a8a; padding: 20px; position: sticky; top: 0; background: #050a14; z-index: 100; }
+        h1 { color: #22c55e; margin: 0; letter-spacing: 5px; }
+        #query { background: #0d1626; border: 1px solid #1e3a8a; color: #22c55e; padding: 12px; width: 300px; outline: none; margin-top: 10px; }
+        .btn { background: #1e3a8a; color: white; border: 1px solid #60a5fa; padding: 12px 25px; cursor: pointer; }
+        
+        /* THE GALLERY GRID */
+        #gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; padding: 20px; }
+        .intel-card { border: 1px solid #1e3a8a; background: rgba(13, 22, 38, 0.9); padding: 15px; transition: 0.3s; position: relative; overflow: hidden; }
+        .intel-card:hover { border-color: #22c55e; box-shadow: 0 0 15px rgba(34, 197, 94, 0.2); }
+        .intel-card h3 { color: #22c55e; font-size: 16px; margin: 0 0 10px 0; }
+        .intel-card p { font-size: 12px; color: #60a5fa; height: 40px; overflow: hidden; }
+        .visit-link { display: inline-block; margin-top: 10px; color: #ffffff; background: #1e3a8a; padding: 5px 10px; text-decoration: none; font-size: 11px; border: 1px solid #60a5fa; }
+        .visit-link:hover { background: #60a5fa; color: #050a14; }
+        .loading { color: #22c55e; text-align: center; width: 100%; padding: 50px; }
     </style>
 </head>
 <body>
 
-    <div class="terminal-box">
+    <div class="terminal-header">
         <h1>34 DIVERSE</h1>
-        <p>> [SYSTEM]: <span style="color: #22c55e;">RE-INITIALIZING_ENGINE</span></p>
-        
-        <input type="text" id="query" placeholder="Target Name...">
-        <button class="btn" onclick="executeScan()">SCAN SECTORS</button>
+        <p>> [SYSTEM]: <span style="color: #22c55e;">INTERNAL_DISPLAY_MODE</span></p>
+        <input type="text" id="query" placeholder="IDENTIFY TARGET..." onkeydown="if(event.key==='Enter') fetchIntel()">
+        <button class="btn" onclick="fetchIntel()">PULL DATA</button>
     </div>
 
-    <iframe id="results-frame" name="results-frame"></iframe>
+    <div id="gallery">
+        <p style="color: #94a3b8;">> Awaiting target identification for internal display...</p>
+    </div>
 
     <script>
-        function executeScan() {
+        async function fetchIntel() {
             const target = document.getElementById('query').value;
-            if(!target) return alert("Agent, input target.");
+            if(!target) return;
 
-            // We are starting with ONLY GameBanana to see if it loads
-            const site = "gamebanana.com";
-            const dork = `site:${site} inurl:view ${target}`;
-            
-            // This is a direct URL to the results
-            const url = `https://duckduckgo.com/?q=${encodeURIComponent(dork)}&ia=videos`;
+            const gallery = document.getElementById('gallery');
+            gallery.innerHTML = '<div class="loading">> BYPASSING FIREWALLS... EXTRACTING DATA...</div>';
 
-            console.log("Targeting URL:", url); // This logs to your browser's 'F12' console
+            // We use a "CORS Proxy" to pull data from a free search API (DuckDuckGo Lite/JSON)
+            // This is a specialized tool to get data INSIDE your site without a server
+            const searchUrl = `https://api.duckduckgo.com/?q=${encodeURIComponent(target + " gamebanana")}&format=json&pretty=1`;
 
-            // Force the frame to load the URL
-            document.getElementById('results-frame').src = url;
+            try {
+                const response = await fetch(searchUrl);
+                const data = await response.json();
+                
+                gallery.innerHTML = ''; // Clear loading
+
+                if (data.RelatedTopics && data.RelatedTopics.length > 0) {
+                    data.RelatedTopics.forEach(topic => {
+                        if (topic.Text) {
+                            const card = document.createElement('div');
+                            card.className = 'intel-card';
+                            card.innerHTML = `
+                                <h3>${topic.Text.substring(0, 50)}...</h3>
+                                <p>${topic.Text}</p>
+                                <a href="${topic.FirstURL}" target="_blank" class="visit-link">BREACH SITE</a>
+                            `;
+                            gallery.appendChild(card);
+                        }
+                    });
+                } else {
+                    gallery.innerHTML = '<p>> NO DIRECT DATA FOUND. ATTEMPTING DEEPER SCAN...</p>';
+                }
+            } catch (error) {
+                gallery.innerHTML = '<p style="color: #e11d48;">> ERROR: DATA EXTRACTION REFUSED. PERMISSION DENIED.</p>';
+            }
         }
     </script>
-
 </body>
 </html>
