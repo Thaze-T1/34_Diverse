@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>34 DIVERSE // INFINITE_TERMINAL</title>
+    <style>
+        body { background-color: #050a14; color: #60a5fa; font-family: 'Courier New', monospace; margin: 0; padding: 20px; }
+        .header { border-bottom: 2px solid #1e3a8a; padding-bottom: 15px; margin-bottom: 20px; }
+        #query { background: #0d1626; border: 1px solid #1e3a8a; color: #22c55e; padding: 12px; width: 300px; outline: none; }
+        .btn { background: #1e3a8a; color: white; border: 1px solid #60a5fa; padding: 12px 20px; cursor: pointer; font-family: inherit; }
+        .btn:hover { background: #60a5fa; color: #050a14; }
+        #results-area { width: 100%; height: 85vh; margin-top: 20px; border: 1px solid #1e3a8a; background: #000; }
+        iframe { width: 100%; height: 100%; border: none; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <p>> [34-D] STATUS: <span style="color: #22c55e;">UNLIMITED_INTEL_ACTIVE</span></p>
+        <input type="text" id="query" placeholder="Enter Target (e.g. Deadpool)...">
+        <button class="btn" onclick="launchScan()">INITIALIZE SCAN</button>
+    </div>
+    <div id="results-area">
+        <iframe id="searchFrame" src="about:blank"></iframe>
+    </div>
+    <script>
+        function launchScan() {
+            const target = document.getElementById('query').value;
+            if(!target) return alert("Agent, input target name.");
+            // THE MASTER DORK: view discovery + video focus
+            const dork = `inurl:view (video OR mp4 OR player) ${target} -inurl:image`;
+            const ddgUrl = `https://duckduckgo.com/?q=${encodeURIComponent(dork)}&ia=videos&iax=videos`;
+            document.getElementById('searchFrame').src = ddgUrl;
+        }
+    </script>
+</body>
+</html>
